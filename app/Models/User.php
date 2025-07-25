@@ -141,6 +141,22 @@ class User extends Authenticatable
      */
     public function canParticipateInCompetitions()
     {
-        return $this->hasActiveSubscription() && $this->active;
+        return $this->hasActiveSubscription() && $this->is_active;
+    }
+
+    /**
+     * Relación con las membresías de equipos
+     */
+    public function teamMemberships()
+    {
+        return $this->hasMany(CompetitionTeamMember::class);
+    }
+
+    /**
+     * Relación con las invitaciones de equipos
+     */
+    public function teamInvitations()
+    {
+        return $this->hasMany(TeamInvitation::class);
     }
 }

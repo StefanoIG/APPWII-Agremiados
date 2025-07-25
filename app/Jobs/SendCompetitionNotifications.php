@@ -33,8 +33,8 @@ class SendCompetitionNotifications implements ShouldQueue
         // Obtener usuarios con suscripciones activas
         $usersWithActiveSubscriptions = User::whereHas('subscriptions', function ($query) {
             $query->where('status', 'active')
-                  ->where('expires_at', '>', now());
-        })->where('active', true)->get();
+                  ->where('end_date', '>=', now());
+        })->where('is_active', true)->get();
 
         // Enviar correo a cada usuario
         foreach ($usersWithActiveSubscriptions as $user) {

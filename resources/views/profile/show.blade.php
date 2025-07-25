@@ -468,7 +468,9 @@
         </div>
     </div>
 </div>
-@stop@section('css')
+@stop
+
+@section('css')
     <style>
         .profile-user-img {
             width: 100px;

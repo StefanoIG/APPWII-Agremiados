@@ -12,6 +12,7 @@ class CompetitionTeam extends Model
     protected $fillable = [
         'name',
         'description',
+        'logo',
         'competition_id',
         'captain_id',
         'status',
@@ -83,4 +84,18 @@ class CompetitionTeam extends Model
     {
         return $this->members()->where('user_id', $userId)->where('status', 'active')->exists();
     }
+    
+    /**
+     * Obtener la URL del logo del equipo
+     */
+    public function getLogoUrl()
+    {
+        if ($this->logo && file_exists(storage_path('app/public/' . $this->logo))) {
+            return asset('storage/' . $this->logo);
+        }
+        
+        // Logo por defecto
+        return asset('storage/logo.jpeg');
+    }
+
 }

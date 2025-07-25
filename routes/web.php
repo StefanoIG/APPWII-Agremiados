@@ -32,7 +32,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
     ->middleware(['auth', \App\Http\Middleware\CheckUserActive::class]);
 
 // Panel para ADMIN
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:admin'])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     
     // Gestión de planes de suscripción para admin
@@ -51,7 +51,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
 });
 
 // Panel para SECRETARIA
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:secretaria'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:secretaria'])->group(function () {
     Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretaria.dashboard');
     Route::get('/secretaria/usuarios-pendientes', [SecretariaController::class, 'usuariosPendientes'])->name('secretaria.usuarios-pendientes');
     Route::get('/secretaria/usuario/{id}', [SecretariaController::class, 'mostrarUsuario'])->name('secretaria.mostrar-usuario');
@@ -146,6 +146,21 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
     Route::get('/competencias', [App\Http\Controllers\CompetitionController::class, 'index'])->name('competitions.index');
     Route::get('/competencias/mis-equipos', [App\Http\Controllers\CompetitionController::class, 'userTeams'])->name('competitions.teams');
     Route::get('/competencias/{competition}', [App\Http\Controllers\CompetitionController::class, 'show'])->name('competitions.show');
+    
+    // Rutas para gestión de equipos en competencias
+    Route::post('/competencias/{competition}/equipos', [App\Http\Controllers\CompetitionController::class, 'createTeam'])->name('competitions.teams.create');
+    Route::post('/competencias/{competition}/equipos/{team}/unirse', [App\Http\Controllers\CompetitionController::class, 'joinTeam'])->name('competitions.teams.join');
+    Route::delete('/competencias/{competition}/equipos/{team}/salir', [App\Http\Controllers\CompetitionController::class, 'leaveTeam'])->name('competitions.teams.leave');
+    
+    // Rutas para invitaciones de equipos
+    Route::post('/competencias/{competition}/equipos/{team}/invitar', [App\Http\Controllers\CompetitionController::class, 'invitePlayer'])->name('competitions.teams.invite');
+    Route::post('/invitaciones/{invitation}/aceptar', [App\Http\Controllers\CompetitionController::class, 'acceptInvitation'])->name('invitations.accept');
+    Route::post('/invitaciones/{invitation}/rechazar', [App\Http\Controllers\CompetitionController::class, 'rejectInvitation'])->name('invitations.reject');
+    Route::get('/mis-invitaciones', [App\Http\Controllers\CompetitionController::class, 'myInvitations'])->name('invitations.index');
+    
+    // Rutas para brackets
+    Route::get('/competencias/{competition}/brackets', [App\Http\Controllers\CompetitionController::class, 'showBrackets'])->name('competitions.brackets');
+    Route::post('/competencias/{competition}/generar-brackets', [App\Http\Controllers\CompetitionController::class, 'generateBrackets'])->name('competitions.brackets.generate');
 });
 
 // Rutas protegidas para archivos (solo para secretaria y admin)
@@ -169,4 +184,20 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
         
         return response()->file($path);
     })->name('archivo.qr');
+});
+
+// Rutas para Categorías (solo admin)
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+    Route::resource('categorias', CategoriaController::class);
+});
+
+// Rutas para Disciplinas (solo admin)
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+    Route::resource('disciplinas', DisciplinaController::class);
+});
+
+// Rutas para gestión de pagos de Admin
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+    Route::get('/admin/pagos', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('admin.payments.index');
+    Route::get('/admin/pagos/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('admin.payments.show');
 });

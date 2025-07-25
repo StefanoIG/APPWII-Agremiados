@@ -137,15 +137,15 @@
 
                         @if($isCaptain)
                             <!-- Modal para Gestionar Equipo -->
-                            <div class="modal fade" id="manageTeamModal{{ $team->id }}" tabindex="-1" role="dialog">
+                            <div class="modal fade" id="manageTeamModal{{ $team->id }}" tabindex="-1" role="dialog" aria-labelledby="manageTeamLabel{{ $team->id }}" aria-hidden="true" data-backdrop="true" data-keyboard="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">
+                                            <h5 class="modal-title" id="manageTeamLabel{{ $team->id }}">
                                                 <i class="fas fa-cog"></i> Gestionar Equipo: {{ $team->name }}
                                             </h5>
-                                            <button type="button" class="close" data-dismiss="modal">
-                                                <span>&times;</span>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <div class="modal-body">
@@ -196,15 +196,15 @@
                             </div>
 
                             <!-- Modal para Invitar Jugador -->
-                            <div class="modal fade" id="invitePlayerModal{{ $team->id }}" tabindex="-1" role="dialog">
+                            <div class="modal fade" id="invitePlayerModal{{ $team->id }}" tabindex="-1" role="dialog" aria-labelledby="invitePlayerLabel{{ $team->id }}" aria-hidden="true" data-backdrop="true" data-keyboard="true">
                                 <div class="modal-dialog" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">
+                                            <h5 class="modal-title" id="invitePlayerLabel{{ $team->id }}">
                                                 <i class="fas fa-user-plus"></i> Invitar Jugador
                                             </h5>
-                                            <button type="button" class="close" data-dismiss="modal">
-                                                <span>&times;</span>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
                                             </button>
                                         </div>
                                         <form action="#" method="POST">
@@ -265,5 +265,93 @@
     .card:hover {
         transform: translateY(-2px);
     }
+    
+    /* Arreglar z-index de modales */
+    .modal {
+        z-index: 1055 !important;
+    }
+    .modal-backdrop {
+        z-index: 1050 !important;
+    }
+    .modal-dialog {
+        z-index: 1060 !important;
+        position: relative;
+    }
+    .modal-content {
+        z-index: 1065 !important;
+        position: relative;
+    }
+    
+    /* Evitar que el modal se mueva */
+    .modal.show {
+        display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+        overflow: hidden !important;
+    }
+    
+    /* Centrar correctamente el modal */
+    .modal-dialog {
+        margin: 1.75rem auto !important;
+        max-width: none !important;
+        width: auto !important;
+        pointer-events: auto !important;
+    }
+    
+    /* Asegurar que el contenido del modal esté arriba */
+    .modal-content {
+        border: 1px solid rgba(0,0,0,.2) !important;
+        border-radius: 0.375rem !important;
+        box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15) !important;
+        background-color: #fff !important;
+        pointer-events: auto !important;
+    }
 </style>
+
+@section('js')
+<script>
+$(document).ready(function() {
+    // Arreglar problemas con modales
+    $('.modal').on('show.bs.modal', function (e) {
+        // Asegurar z-index correcto
+        var modal = $(this);
+        var backdrop = $('.modal-backdrop');
+        
+        // Configurar z-index
+        modal.css('z-index', 1055);
+        backdrop.css('z-index', 1050);
+        
+        // Asegurar que el modal esté centrado
+        modal.css({
+            'position': 'fixed',
+            'top': '0',
+            'left': '0',
+            'width': '100%',
+            'height': '100%',
+            'overflow': 'hidden'
+        });
+        
+        // Prevenir problemas de scroll
+        $('body').addClass('modal-open');
+    });
+    
+    $('.modal').on('shown.bs.modal', function (e) {
+        // Forzar focus al modal para evitar problemas
+        $(this).focus();
+    });
+    
+    $('.modal').on('hide.bs.modal', function (e) {
+        // Limpiar estilos cuando se cierra
+        $('body').removeClass('modal-open');
+    });
+    
+    // Evitar que los modales se muevan al hacer hover
+    $('.modal').on('mouseenter mouseleave', function(e) {
+        e.stopPropagation();
+    });
+});
+</script>
 @stop

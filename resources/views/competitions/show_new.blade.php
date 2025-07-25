@@ -82,15 +82,6 @@
                         <a href="{{ route('competitions.edit', $competition) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar Competencia
                         </a>
-                        <form action="{{ route('competitions.brackets.generate', $competition) }}" method="POST" style="display: inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de generar los brackets? Esto eliminará los brackets existentes.')">
-                                <i class="fas fa-random"></i> Generar Brackets
-                            </button>
-                        </form>
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
-                        </a>
                         <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver a Competencias
                         </a>
@@ -99,24 +90,6 @@
                     <div class="card-footer">
                         <a href="{{ route('competitions.edit', $competition) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar Competencia
-                        </a>
-                        <form action="{{ route('competitions.brackets.generate', $competition) }}" method="POST" style="display: inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de generar los brackets? Esto eliminará los brackets existentes.')">
-                                <i class="fas fa-random"></i> Generar Brackets
-                            </button>
-                        </form>
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
-                        </a>
-                        <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Volver a Competencias
-                        </a>
-                    </div>
-                @else
-                    <div class="card-footer">
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
                         </a>
                         <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
                             <i class="fas fa-arrow-left"></i> Volver a Competencias

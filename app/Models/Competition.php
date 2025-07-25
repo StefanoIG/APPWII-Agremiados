@@ -65,6 +65,14 @@ class Competition extends Model
     }
 
     /**
+     * Relación con los brackets de la competencia
+     */
+    public function brackets()
+    {
+        return $this->hasMany(CompetitionBracket::class);
+    }
+
+    /**
      * Verificar si la competencia está abierta para inscripciones
      */
     public function isOpenForRegistration()

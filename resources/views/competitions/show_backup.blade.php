@@ -49,8 +49,9 @@
                 <div class="card-body">
                     @if($competition->description)
                         <p class="lead">{{ $competition->description }}</p>
+                        <hr>
                     @endif
-                    
+
                     <div class="row">
                         <div class="col-md-6">
                             <h5>Detalles de la Competencia</h5>
@@ -62,67 +63,38 @@
                             @if($competition->max_teams)
                                 <p><strong>Máximo de equipos:</strong> {{ $competition->max_teams }}</p>
                             @endif
-                            <p><strong>Creado por:</strong> 
-                            @if($competition->creator)
-                                {{ $competition->creator->name }}
-                            @endif
-                            </p>
                         </div>
                         <div class="col-md-6">
                             <h5>Fechas Importantes</h5>
                             <p><strong>Fecha de inicio:</strong> {{ $competition->start_date->format('d/m/Y') }}</p>
                             <p><strong>Fecha de fin:</strong> {{ $competition->end_date->format('d/m/Y') }}</p>
-                            <p><strong>Límite de inscripción:</strong> {{ $competition->registration_deadline->format('d/m/Y') }}</p>
+                            <p><strong>Límite de inscripción:</strong> 
+                                <span class="{{ $competition->registration_deadline < now() ? 'text-danger' : 'text-success' }}">
+                                    {{ $competition->registration_deadline->format('d/m/Y') }}
+                                </span>
+                            </p>
+                            @if($competition->creator)
+                                <p><strong>Creado por:</strong> {{ $competition->creator->name }}</p>
+                            @endif
+                            <p><strong>Creado el:</strong> {{ $competition->created_at->format('d/m/Y H:i') }}</p>
                         </div>
                     </div>
                 </div>
-                
-                @if(auth()->user()->hasRole(['admin', 'secretaria']))
-                    <div class="card-footer">
+                <div class="card-footer">
+                    @can('admin')
                         <a href="{{ route('competitions.edit', $competition) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar Competencia
                         </a>
-                        <form action="{{ route('competitions.brackets.generate', $competition) }}" method="POST" style="display: inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de generar los brackets? Esto eliminará los brackets existentes.')">
-                                <i class="fas fa-random"></i> Generar Brackets
-                            </button>
-                        </form>
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
-                        </a>
-                        <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Volver a Competencias
-                        </a>
-                    </div>
-                @elseif(auth()->user()->hasRole('admin'))
-                    <div class="card-footer">
+                    @endcan
+                    @hasrole('secretaria')
                         <a href="{{ route('competitions.edit', $competition) }}" class="btn btn-warning">
                             <i class="fas fa-edit"></i> Editar Competencia
                         </a>
-                        <form action="{{ route('competitions.brackets.generate', $competition) }}" method="POST" style="display: inline-block;">
-                            @csrf
-                            <button type="submit" class="btn btn-success" onclick="return confirm('¿Estás seguro de generar los brackets? Esto eliminará los brackets existentes.')">
-                                <i class="fas fa-random"></i> Generar Brackets
-                            </button>
-                        </form>
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
-                        </a>
-                        <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Volver a Competencias
-                        </a>
-                    </div>
-                @else
-                    <div class="card-footer">
-                        <a href="{{ route('competitions.brackets', $competition) }}" class="btn btn-info">
-                            <i class="fas fa-sitemap"></i> Ver Brackets
-                        </a>
-                        <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Volver a Competencias
-                        </a>
-                    </div>
-                @endif
+                    @endhasrole
+                    <a href="{{ route('competitions.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left"></i> Volver a Competencias
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -136,19 +108,19 @@
                         </h4>
                     </div>
                     <div class="card-body">
-                        @if(isset($userTeam) && $userTeam)
+                        @if($userTeam)
                             <div class="alert alert-info">
                                 <i class="fas fa-check"></i> Ya estás participando en el equipo: 
                                 <strong>{{ $userTeam->name }}</strong>
-                                @if(isset($isCaptain) && $isCaptain)
-                                    <br><small class="text-muted"><i class="fas fa-crown"></i> Eres el capitán</small>
+                                @if($isCaptain)
+                                    <br><span class="badge badge-warning"><i class="fas fa-crown"></i> Capitán</span>
                                 @endif
                             </div>
-                            <a href="{{ route('competitions.teams') }}" class="btn btn-outline-primary btn-block">
+                            <a href="#" class="btn btn-outline-primary btn-block">
                                 <i class="fas fa-eye"></i> Ver Mi Equipo
                             </a>
-                            @if(isset($isCaptain) && $isCaptain && $userTeam->current_members < $competition->max_members && isset($availableUsers) && $availableUsers->count() > 0)
-                                <button class="btn btn-success btn-block" data-toggle="modal" data-target="#invitePlayerModal">
+                            @if($isCaptain && $userTeam->current_members < $competition->max_members && $availableUsers->count() > 0)
+                                <button class="btn btn-warning btn-block" data-toggle="modal" data-target="#invitePlayerModal">
                                     <i class="fas fa-user-plus"></i> Invitar Jugador
                                 </button>
                             @endif
@@ -160,6 +132,9 @@
                             </div>
                             <a href="{{ route('subscriptions.plans') }}" class="btn btn-warning btn-block">
                                 <i class="fas fa-star"></i> Ver Planes de Suscripción
+                            </a>
+                            <a href="/debug-subscriptions" class="btn btn-info btn-block">
+                                <i class="fas fa-bug"></i> Debug Suscripciones
                             </a>
                         @else
                             <p class="text-center">¿Quieres participar en esta competencia?</p>
@@ -186,7 +161,7 @@
             @endif
 
             <!-- Estadísticas -->
-            <div class="card mt-3">
+            <div class="card">
                 <div class="card-header">
                     <h4 class="card-title"><i class="fas fa-chart-bar"></i> Estadísticas</h4>
                 </div>
@@ -198,11 +173,13 @@
                     </p>
                     <p><strong>Total de participantes:</strong> {{ $competition->teams->sum('current_members') }}</p>
                     
-                    <div class="progress mb-3">
-                        <div class="progress-bar" role="progressbar" 
-                             style="width: {{ $competition->max_teams ? ($competition->teams->count() / $competition->max_teams) * 100 : 0 }}%">
+                    @if($competition->teams->count() > 0)
+                        <div class="progress mb-2">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ $competition->max_teams ? ($competition->teams->count() / $competition->max_teams * 100) : 100 }}%">
+                            </div>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -257,7 +234,7 @@
 </div>
 
 <!-- Modal para Crear Equipo -->
-@if($competition->isOpenForRegistration() && (!isset($userTeam) || !$userTeam))
+@if($competition->isOpenForRegistration() && !$userTeam)
 <div class="modal fade" id="createTeamModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -295,10 +272,8 @@
         </div>
     </div>
 </div>
-@endif
 
 <!-- Modal para Buscar Equipo -->
-@if($competition->isOpenForRegistration() && (!isset($userTeam) || !$userTeam))
 <div class="modal fade" id="joinTeamModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -356,10 +331,9 @@
         </div>
     </div>
 </div>
-@endif
 
 <!-- Modal para Invitar Jugador -->
-@if(isset($userTeam) && isset($isCaptain) && $userTeam && $isCaptain && $userTeam->current_members < $competition->max_members)
+@if($userTeam && $isCaptain && $userTeam->current_members < $competition->max_members)
 <div class="modal fade" id="invitePlayerModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -376,11 +350,9 @@
                         <label for="user_id">Seleccionar Jugador *</label>
                         <select class="form-control" id="user_id" name="user_id" required>
                             <option value="">Selecciona un jugador...</option>
-                            @if(isset($availableUsers))
-                                @foreach($availableUsers as $user)
-                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                @endforeach
-                            @endif
+                            @foreach($availableUsers as $user)
+                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                            @endforeach
                         </select>
                         <small class="form-text text-muted">Solo se muestran usuarios con suscripción activa que no estén en otro equipo.</small>
                     </div>
@@ -401,101 +373,4 @@
     </div>
 </div>
 @endif
-@stop
-
-@section('css')
-<style>
-/* Estilos para los modales */
-.modal {
-    z-index: 1055;
-}
-
-.modal-backdrop {
-    z-index: 1050;
-}
-
-/* Prevenir que los modales se muevan */
-.modal.show .modal-dialog {
-    transform: none !important;
-}
-
-.modal-dialog {
-    margin: 1.75rem auto;
-    max-width: 500px;
-}
-
-.modal-lg {
-    max-width: 800px;
-}
-
-/* Estilos para las tarjetas de equipos */
-.border-left-primary {
-    border-left: 0.25rem solid #007bff !important;
-}
-
-/* Mejoras visuales */
-.card-body img {
-    border: 2px solid #dee2e6;
-}
-
-.progress {
-    height: 10px;
-}
-
-.alert-info {
-    background-color: #d1ecf1;
-    border-color: #bee5eb;
-    color: #0c5460;
-}
-
-/* Prevenir salto de modal */
-body.modal-open {
-    overflow: hidden;
-}
-
-.modal-dialog {
-    position: relative;
-    width: auto;
-    margin: 0.5rem;
-    pointer-events: none;
-}
-
-@media (min-width: 576px) {
-    .modal-dialog {
-        max-width: 500px;
-        margin: 1.75rem auto;
-    }
-}
-</style>
-@stop
-
-@section('js')
-<script>
-$(document).ready(function() {
-    // Prevenir problemas con múltiples modales
-    $('.modal').on('show.bs.modal', function () {
-        var zIndex = 1040 + (10 * $('.modal:visible').length);
-        $(this).css('z-index', zIndex);
-        setTimeout(function() {
-            $('.modal-backdrop').not('.modal-stack').css('z-index', zIndex - 1).addClass('modal-stack');
-        }, 0);
-    });
-
-    // Resetear formularios cuando se cierra el modal
-    $('.modal').on('hidden.bs.modal', function () {
-        $(this).find('form')[0]?.reset();
-    });
-
-    // Prevenir scroll del body cuando el modal está abierto
-    $('.modal').on('shown.bs.modal', function () {
-        $('body').addClass('modal-open');
-    });
-
-    $('.modal').on('hidden.bs.modal', function () {
-        if (!$('.modal.show').length) {
-            $('body').removeClass('modal-open');
-        }
-    });
-});
-</script>
 @stop

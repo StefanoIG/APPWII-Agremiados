@@ -346,6 +346,12 @@ return [
             'icon' => 'fas fa-chart-line',
             'can' => 'admin',
         ],
+        [
+            'text' => 'Ver Pagos',
+            'route' => 'admin.payments.index',
+            'icon' => 'fas fa-money-bill',
+            'can' => 'admin',
+        ],
         
         // Sección para Secretaria
         [
@@ -388,16 +394,40 @@ return [
             'header' => 'SISTEMA',
         ],
         [
+            'text' => 'Dashboard Admin',
+            'route' => 'admin.dashboard',
+            'icon' => 'fas fa-tachometer-alt',
+            'can' => 'admin',
+            'label' => 'Admin',
+            'label_color' => 'danger',
+        ],
+        [
+            'text' => 'Dashboard Secretaria',
+            'route' => 'secretaria.dashboard',
+            'icon' => 'fas fa-clipboard-check',
+            'can' => 'secretaria',
+            'label' => 'Secretaría',
+            'label_color' => 'info',
+        ],
+        [
+            'text' => 'Panel Usuario',
+            'route' => 'home',
+            'icon' => 'fas fa-user-circle',
+            'can' => 'user',
+            'label' => 'Usuario',
+            'label_color' => 'success',
+        ],
+        [
             'text' => 'Categorías',
-            'url' => 'categorias',
+            'route' => 'categorias.index',
             'icon' => 'fas fa-list',
-            'can' => ['admin', 'secretaria'],
+            'can' => 'admin',
         ],
         [
             'text' => 'Disciplinas',
-            'url' => 'disciplinas',
+            'route' => 'disciplinas.index',
             'icon' => 'fas fa-dumbbell',
-            'can' => ['admin', 'secretaria'],
+            'can' => 'admin',
         ],
         [
             'text' => 'Equipos',
@@ -458,6 +488,11 @@ return [
             'text' => 'Mis Equipos',
             'route' => 'competitions.teams',
             'icon' => 'fas fa-users',
+        ],
+        [
+            'text' => 'Mis Invitaciones',
+            'route' => 'invitations.index',
+            'icon' => 'fas fa-envelope',
         ],
         
         // Sección personal
