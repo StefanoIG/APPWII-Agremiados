@@ -52,15 +52,18 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'lasname' => ['nullable', 'string', 'max:255'],
+            'identification_number' => ['required', 'string', 'max:20', 'unique:users,identification_number'],
             'email' => ['required', 'string', 'email', 'max:100', 'unique:users,email'],
+            'phone' => ['required', 'string', 'max:20'],
+            'birth_date' => ['required', 'date', 'before:today'],
+            'address' => ['required', 'string', 'max:500'],
+            'gender' => ['required', 'in:M,F,Otro'],
+            'emergency_contact_name' => ['required', 'string', 'max:255'],
+            'emergency_contact_phone' => ['required', 'string', 'max:20'],
+            'profession' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'titulo_pdf' => ['required', 'file', 'mimes:pdf', 'max:2048'],
-            'qr_pdf' => ['required', 'file', 'mimes:pdf', 'max:2048'],
-            'idn' => ['nullable', 'string', 'max:45'],
-            'phone' => ['nullable', 'string', 'max:45'],
-            'address' => ['nullable', 'string', 'max:255'],
-            'brithday' => ['nullable', 'date'],
+            'agree_terms' => ['required', 'accepted'],
         ]);
     }
 
@@ -73,23 +76,34 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
         $tituloPath = null;
-        $qrPath = null;
+        
+        // Subir título PDF
         if (request()->hasFile('titulo_pdf')) {
             $tituloPath = request()->file('titulo_pdf')->store('titulos', 'public');
         }
-        if (request()->hasFile('qr_pdf')) {
-            $qrPath = request()->file('qr_pdf')->store('qrs', 'public');
-        }
+        
+        // Crear usuario con todos los campos
         $user = User::create([
             'name' => $data['name'],
+            'identification_number' => $data['identification_number'],
             'email' => $data['email'],
+            'phone' => $data['phone'],
+            'birth_date' => $data['birth_date'],
+            'address' => $data['address'],
+            'gender' => $data['gender'],
+            'emergency_contact_name' => $data['emergency_contact_name'],
+            'emergency_contact_phone' => $data['emergency_contact_phone'],
+            'profession' => $data['profession'],
             'password' => Hash::make($data['password']),
             'titulo_pdf' => $tituloPath,
-            'qrpdt' => $qrPath,
-            'is_active' => 0,
+            'is_active' => false, // Usuario inactivo hasta aprobación
             'created_at' => now(),
+            'updated_at' => now(),
         ]);
+        
+        // Asignar rol de usuario
         $user->assignRole('user');
+        
         return $user;
     }
 
@@ -109,7 +123,10 @@ class RegisterController extends Controller
             Notification::send($secretarias, new NewUserRegistered($user));
         }
         
-        // No loguear automáticamente
-        return redirect('/login')->with('status', 'Registro exitoso. Tu cuenta está pendiente de activación por un administrador o secretaria.');
+        // Redirigir con mensaje sobre proceso de aprobación y suscripción
+        return redirect('/login')->with('status', 
+            'Registro exitoso. Tu cuenta está pendiente de activación. ' .
+            'Una vez aprobada, deberás seleccionar y pagar un plan de suscripción para acceder completamente a la plataforma.'
+        );
     }
 }

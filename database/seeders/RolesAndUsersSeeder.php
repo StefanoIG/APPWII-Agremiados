@@ -64,8 +64,23 @@ class RolesAndUsersSeeder extends Seeder
         );
         $secretaria->assignRole('secretaria');
 
+        // Crear usuario de prueba si no existe
+        $testUser = User::firstOrCreate(
+            ['email' => 'test@agremiados.com'],
+            [
+                'name' => 'Usuario de Prueba',
+                'identification_number' => '12345678',
+                'password' => Hash::make('test123'),
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+        $testUser->assignRole('user');
+
         $this->command->info('Roles y usuarios creados exitosamente:');
         $this->command->info('Admin: admin@agremiados.com / admin123');
         $this->command->info('Secretaria: secretaria@agremiados.com / secretaria123');
+        $this->command->info('Usuario: test@agremiados.com / test123');
     }
 }

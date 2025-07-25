@@ -334,6 +334,18 @@ return [
             'icon' => 'fas fa-user-shield',
             'can' => 'admin',
         ],
+        [
+            'text' => 'Planes de Suscripción',
+            'route' => 'admin.planes',
+            'icon' => 'fas fa-credit-card',
+            'can' => 'admin',
+        ],
+        [
+            'text' => 'Reportes Suscripciones',
+            'route' => 'admin.suscripciones',
+            'icon' => 'fas fa-chart-line',
+            'can' => 'admin',
+        ],
         
         // Sección para Secretaria
         [
@@ -351,6 +363,12 @@ return [
             'route' => 'secretaria.usuarios-pendientes',
             'icon' => 'fas fa-user-clock',
             'can' => 'secretaria',
+        ],
+        [
+            'text' => 'Pagos Pendientes',
+            'route' => 'payments.pending',
+            'icon' => 'fas fa-receipt',
+            'can' => ['admin', 'secretaria'],
         ],
         
         // Sección común para Admin y Secretaria
@@ -404,6 +422,21 @@ return [
             'url' => 'articles',
             'icon' => 'fas fa-newspaper',
             'can' => ['admin', 'secretaria'],
+        ],
+        
+        // Sección personal
+        [
+            'header' => 'SUSCRIPCIONES',
+        ],
+        [
+            'text' => 'Planes Disponibles',
+            'route' => 'subscriptions.plans',
+            'icon' => 'fas fa-star',
+        ],
+        [
+            'text' => 'Mis Suscripciones',
+            'route' => 'subscriptions.my',
+            'icon' => 'fas fa-receipt',
         ],
         
         // Sección personal

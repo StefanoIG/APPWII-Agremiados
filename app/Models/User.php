@@ -24,7 +24,15 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'identification_number',
         'email',
+        'phone',
+        'birth_date',
+        'address',
+        'gender',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'profession',
         'email_verified_at',
         'password',
         'remember_token',
@@ -58,6 +66,7 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
+            'birth_date' => 'date',
         ];
     }
     
@@ -93,5 +102,37 @@ class User extends Authenticatable
     {
         $roles = $this->getRoleNames();
         return $roles->isNotEmpty() ? $roles->first() : 'Usuario';
+    }
+
+    /**
+     * Relación con las suscripciones del usuario
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(UserSubscription::class);
+    }
+
+    /**
+     * Relación con los recibos de pago
+     */
+    public function paymentReceipts()
+    {
+        return $this->hasMany(PaymentReceipt::class);
+    }
+
+    /**
+     * Obtener la suscripción activa del usuario
+     */
+    public function activeSubscription()
+    {
+        return $this->subscriptions()->active()->first();
+    }
+
+    /**
+     * Verificar si el usuario tiene una suscripción activa
+     */
+    public function hasActiveSubscription()
+    {
+        return $this->activeSubscription() !== null;
     }
 }
