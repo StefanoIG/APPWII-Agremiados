@@ -135,4 +135,12 @@ class User extends Authenticatable
     {
         return $this->activeSubscription() !== null;
     }
+
+    /**
+     * Verificar si el usuario puede participar en competencias
+     */
+    public function canParticipateInCompetitions()
+    {
+        return $this->hasActiveSubscription() && $this->active;
+    }
 }

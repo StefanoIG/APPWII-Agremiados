@@ -439,6 +439,27 @@ return [
             'icon' => 'fas fa-receipt',
         ],
         
+        // Sección de competencias
+        [
+            'header' => 'COMPETENCIAS',
+        ],
+        [
+            'text' => 'Todas las Competencias',
+            'route' => 'competitions.index',
+            'icon' => 'fas fa-trophy',
+        ],
+        [
+            'text' => 'Crear Competencia',
+            'route' => 'competitions.create',
+            'icon' => 'fas fa-plus-circle',
+            'can' => ['admin', 'secretaria'],
+        ],
+        [
+            'text' => 'Mis Equipos',
+            'route' => 'competitions.teams',
+            'icon' => 'fas fa-users',
+        ],
+        
         // Sección personal
         [
             'header' => 'MI CUENTA',

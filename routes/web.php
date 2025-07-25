@@ -14,6 +14,7 @@ use App\Http\Controllers\UserTeamController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SecretariaController;
 use App\Http\Controllers\SubscriptionController;
+use App\Http\Controllers\CompetitionController;
 use Spatie\Permission\Middlewares\RoleMiddleware;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,6 +44,10 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
     // Reportes de suscripciones
     Route::get('/admin/suscripciones', [SubscriptionController::class, 'adminIndex'])->name('admin.suscripciones');
     Route::get('/admin/reportes/suscripciones', [SubscriptionController::class, 'reports'])->name('admin.reportes.suscripciones');
+    
+    // Aprobación de competencias (solo admin)
+    Route::post('/competencias/{competition}/aprobar', [CompetitionController::class, 'approve'])->name('competitions.approve');
+    Route::post('/competencias/{competition}/rechazar', [CompetitionController::class, 'reject'])->name('competitions.reject');
 });
 
 // Panel para SECRETARIA
@@ -73,6 +78,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
     Route::post('/pago/{receipt}/rechazar', [PaymentController::class, 'reject'])->name('payments.reject');
     Route::get('/pago/{receipt}/ver', [PaymentController::class, 'viewReceipt'])->name('payments.view');
     Route::get('/pagos/estadisticas', [PaymentController::class, 'stats'])->name('payments.stats');
+    
+    // Rutas de competencias para admin y secretaria
+    Route::get('/competencias/crear', [App\Http\Controllers\CompetitionController::class, 'create'])->name('competitions.create');
+    Route::post('/competencias', [App\Http\Controllers\CompetitionController::class, 'store'])->name('competitions.store');
+    Route::get('/competencias/{competition}/editar', [App\Http\Controllers\CompetitionController::class, 'edit'])->name('competitions.edit');
+    Route::put('/competencias/{competition}', [App\Http\Controllers\CompetitionController::class, 'update'])->name('competitions.update');
 });
 
 // Rutas de roles (Spatie compatible, sin bindings automáticos)
@@ -130,6 +141,11 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
     Route::post('/suscripciones/suscribirse/{plan}', [SubscriptionController::class, 'subscribe'])->name('subscriptions.subscribe');
     Route::get('/suscripciones/{subscription}', [SubscriptionController::class, 'show'])->name('subscriptions.show');
     Route::post('/pagos/subir-comprobante/{subscription}', [PaymentController::class, 'upload'])->name('payments.upload');
+    
+    // Rutas del sistema de competencias
+    Route::get('/competencias', [App\Http\Controllers\CompetitionController::class, 'index'])->name('competitions.index');
+    Route::get('/competencias/mis-equipos', [App\Http\Controllers\CompetitionController::class, 'userTeams'])->name('competitions.teams');
+    Route::get('/competencias/{competition}', [App\Http\Controllers\CompetitionController::class, 'show'])->name('competitions.show');
 });
 
 // Rutas protegidas para archivos (solo para secretaria y admin)
