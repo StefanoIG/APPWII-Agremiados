@@ -11,6 +11,89 @@ use Illuminate\Support\Facades\Storage;
 class UserDebtController extends Controller
 {
     /**
+     * Mostrar deudas del usuario actual (index)
+     */
+    public function index()
+    {
+        return $this->myDebts();
+    }
+
+    /**
+     * Vista administrativa para gestionar todas las deudas
+     */
+    public function adminIndex(Request $request)
+    {
+        $query = UserDebt::with(['user', 'monthlyCut']);
+        
+        // Filtrar por status si se proporciona
+        if ($request->has('status') && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+        
+        // Ordenar por fecha de creación descendente
+        $query->orderBy('created_at', 'desc');
+        
+        $debts = $query->paginate(20);
+        
+        // Mantener parámetros de filtro en la paginación
+        $debts->appends($request->query());
+        
+        // Estadísticas
+        $pendingDebts = UserDebt::where('status', 'pending')->count();
+        $pendingApproval = UserDebt::where('status', 'pending_approval')->count();
+        $overdueDebts = UserDebt::where('status', 'overdue')->count();
+        $paidDebts = UserDebt::where('status', 'paid')->count();
+
+        return view('admin.user_debts.index', compact(
+            'debts', 
+            'pendingDebts', 
+            'pendingApproval', 
+            'overdueDebts', 
+            'paidDebts'
+        ));
+    }
+
+    /**
+     * Aprobar un pago
+     */
+    public function approvePay(UserDebt $debt)
+    {
+        if ($debt->status === 'pending_approval') {
+            $debt->update([
+                'status' => 'paid',
+                'paid_at' => now()
+            ]);
+            
+            return back()->with('success', 'Pago aprobado correctamente.');
+        }
+        
+        return back()->with('error', 'El pago no está pendiente de aprobación.');
+    }
+
+    /**
+     * Rechazar un pago
+     */
+    public function rejectPay(UserDebt $debt)
+    {
+        if ($debt->status === 'pending_approval') {
+            $debt->update([
+                'status' => 'pending',
+                'payment_receipt' => null,
+                'payment_method' => null
+            ]);
+            
+            // Opcional: eliminar el archivo del recibo
+            if ($debt->payment_receipt) {
+                Storage::disk('public')->delete($debt->payment_receipt);
+            }
+            
+            return back()->with('success', 'Pago rechazado. Usuario deberá subir nuevo comprobante.');
+        }
+        
+        return back()->with('error', 'El pago no está pendiente de aprobación.');
+    }
+
+    /**
      * Mostrar deudas del usuario actual
      */
     public function myDebts()
@@ -70,6 +153,7 @@ class UserDebtController extends Controller
 
         // Marcar la deuda con el comprobante subido
         $debt->update([
+            'payment_receipt' => $fileName,
             'receipt_url' => Storage::url($fileName),
             'payment_method' => $request->payment_method,
             'notes' => $request->notes,
@@ -104,10 +188,10 @@ class UserDebtController extends Controller
         $debt->update([
             'payment_receipt' => $fileName,
             'paid_at' => now(),
-            // Mantener status como 'pending' hasta que la secretaria apruebe
+            'status' => 'pending_approval', // Cambiar a pendiente de aprobación
         ]);
 
-        return redirect()->route('debts.my-debts')
+        return redirect()->route('user-debts.my-debts')
                         ->with('success', 'Comprobante de pago subido exitosamente. Pendiente de aprobación por la secretaría.');
     }
 
@@ -130,7 +214,14 @@ class UserDebtController extends Controller
      */
     public function approvePayment(UserDebt $debt)
     {
-        $debt->markAsPaid($debt->payment_receipt);
+        $debt->update([
+            'status' => 'paid',
+            'paid_at' => now()
+        ]);
+
+        if (request()->ajax()) {
+            return response()->json(['message' => 'Pago aprobado exitosamente']);
+        }
 
         return redirect()->back()
                         ->with('success', 'Pago aprobado exitosamente.');
@@ -141,10 +232,6 @@ class UserDebtController extends Controller
      */
     public function rejectPayment(Request $request, UserDebt $debt)
     {
-        $request->validate([
-            'rejection_reason' => 'required|string|max:500',
-        ]);
-
         // Eliminar el comprobante subido
         if ($debt->payment_receipt) {
             Storage::delete('public/' . $debt->payment_receipt);
@@ -154,10 +241,13 @@ class UserDebtController extends Controller
             'payment_receipt' => null,
             'paid_at' => null,
             'status' => 'pending',
+            'payment_method' => null
         ]);
 
-        // Aquí podrías enviar un email al usuario explicando el rechazo
-        
+        if (request()->ajax()) {
+            return response()->json(['message' => 'Pago rechazado']);
+        }
+
         return redirect()->back()
                         ->with('success', 'Pago rechazado. El usuario ha sido notificado.');
     }

@@ -117,6 +117,14 @@ class UserDebt extends Model
     }
 
     /**
+     * Scope para deudas pendientes de aprobación
+     */
+    public function scopePendingApproval($query)
+    {
+        return $query->where('status', 'pending_approval');
+    }
+
+    /**
      * Scope para deudas vencidas
      */
     public function scopeOverdue($query)

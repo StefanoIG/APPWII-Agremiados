@@ -59,13 +59,13 @@
                     <i class="fas fa-users-cog fa-4x text-warning mb-3"></i>
                     <p>Administra las deudas de todos los usuarios, aprueba pagos y gestiona estados.</p>
                     <div class="btn-group-vertical" style="width: 100%;">
-                        <a href="{{ route('user-debts.index') }}" class="btn btn-warning btn-lg mb-2">
+                        <a href="{{ route('user-debts.admin') }}" class="btn btn-warning btn-lg mb-2">
                             <i class="fas fa-search mr-2"></i>
                             Ver Todas las Deudas
                         </a>
-                        <a href="{{ route('user-debts.index', ['status' => 'pending']) }}" class="btn btn-danger btn-lg">
+                        <a href="{{ route('user-debts.admin') }}?status=pending_approval" class="btn btn-danger btn-lg">
                             <i class="fas fa-exclamation-circle mr-2"></i>
-                            Deudas Pendientes
+                            Deudas Pendientes de Aprobación
                         </a>
                     </div>
                 </div>

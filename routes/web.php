@@ -206,6 +206,11 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
     Route::get('/deudas/{debt}', [UserDebtController::class, 'show'])->name('user-debts.show');
     Route::post('/deudas/{debt}/aprobar', [UserDebtController::class, 'approve'])->name('user-debts.approve');
     Route::post('/deudas/{debt}/rechazar', [UserDebtController::class, 'reject'])->name('user-debts.reject');
+    
+    // Gestión administrativa de deudas
+    Route::get('/admin/deudas', [UserDebtController::class, 'adminIndex'])->name('user-debts.admin');
+    Route::post('/admin/deudas/{debt}/aprobar', [UserDebtController::class, 'approvePayment'])->name('user-debts.approve-payment');
+    Route::post('/admin/deudas/{debt}/rechazar', [UserDebtController::class, 'rejectPayment'])->name('user-debts.reject-payment');
 });
 
 // Rutas protegidas para archivos (solo para secretaria y admin)
