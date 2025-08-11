@@ -135,6 +135,7 @@
                             </div>
                         </div>
 
+
                         <div class="form-group">
                             <label for="max_teams">Número Máximo de Equipos (opcional)</label>
                             <input type="number" class="form-control @error('max_teams') is-invalid @enderror" 
@@ -143,6 +144,22 @@
                             @error('max_teams')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
+                        </div>
+
+                        <div class="form-group">
+                            <label for="fee">¿Competencia requiere cuota de inscripción?</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="has_fee" name="has_fee" value="1" {{ old('has_fee') ? 'checked' : '' }}>
+                                <label class="form-check-label" for="has_fee">Sí, requiere cuota</label>
+                            </div>
+                            <div id="fee_amount_group" class="mt-2" style="display: {{ old('has_fee') ? 'block' : 'none' }};">
+                                <label for="fee_amount">Monto de la cuota (valor por equipo)</label>
+                                <input type="number" class="form-control @error('fee_amount') is-invalid @enderror" id="fee_amount" name="fee_amount" min="0" step="100" value="{{ old('fee_amount', config('gremio.alicuota')) }}">
+                                <small class="form-text text-muted">Este valor puede ser sugerido por el gremio.</small>
+                                @error('fee_amount')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
                         </div>
 
                         <div class="row">
@@ -197,6 +214,15 @@
 
 @section('js')
 <script>
+$(function() {
+    $('#has_fee').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#fee_amount_group').show();
+        } else {
+            $('#fee_amount_group').hide();
+        }
+    });
+});
 $(document).ready(function() {
     // Auto-ajustar fechas relacionadas
     $('#start_date').change(function() {

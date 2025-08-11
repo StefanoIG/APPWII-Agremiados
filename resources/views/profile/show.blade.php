@@ -320,12 +320,12 @@
                             <span class="float-right">{{ Auth::user()->created_at->format('M Y') }}</span>
                         </li>
                         <li class="list-group-item">
-                            <b>Suscripción</b>
+                            <b>Estado de Pagos</b>
                             <span class="float-right">
-                                @if(Auth::user()->hasActiveSubscription())
-                                    <span class="badge badge-success">Activa</span>
+                                @if(!Auth::user()->hasPendingDebts())
+                                    <span class="badge badge-success">Al día</span>
                                 @else
-                                    <span class="badge badge-secondary">Sin plan</span>
+                                    <span class="badge badge-warning">Con deudas pendientes</span>
                                 @endif
                             </span>
                         </li>
@@ -413,55 +413,53 @@
                 <div class="card card-primary">
                     <div class="card-header">
                         <h3 class="card-title">
-                            <i class="fas fa-star"></i> Estado de Suscripción
+                            <i class="fas fa-money-bill-wave"></i> Estado de Pagos
                         </h3>
                     </div>
                     <div class="card-body">
-                        @if(Auth::user()->hasActiveSubscription())
+                        @if(!Auth::user()->hasPendingDebts())
+                            <div class="alert alert-success">
+                                <h5><i class="icon fas fa-check"></i> ¡Al día!</h5>
+                                No tienes deudas pendientes. Puedes participar en todas las actividades.
+                            </div>
+                        @else
                             @php
-                                $activeSubscription = Auth::user()->activeSubscription();
+                                $pendingDebts = Auth::user()->getPendingDebts();
+                                $totalDebt = Auth::user()->getTotalPendingDebt();
                             @endphp
+                            <div class="alert alert-warning">
+                                <h5><i class="icon fas fa-exclamation-triangle"></i> Tienes deudas pendientes</h5>
+                                Total adeudado: <strong>${{ number_format($totalDebt, 2) }}</strong>
+                            </div>
+                            
                             <div class="row">
-                                <div class="col-sm-4">
-                                    <strong><i class="fas fa-credit-card mr-1"></i> Plan Actual</strong>
-                                    <p class="text-muted">{{ $activeSubscription->plan->name }}</p>
+                                <div class="col-sm-6">
+                                    <strong><i class="fas fa-list mr-1"></i> Deudas Pendientes</strong>
+                                    <p class="text-muted">{{ $pendingDebts->count() }} deuda(s)</p>
                                 </div>
-                                <div class="col-sm-4">
-                                    <strong><i class="fas fa-calendar mr-1"></i> Válido hasta</strong>
-                                    <p class="text-muted">{{ $activeSubscription->ends_at->format('d/m/Y') }}</p>
-                                </div>
-                                <div class="col-sm-4">
-                                    <strong><i class="fas fa-clock mr-1"></i> Días restantes</strong>
-                                    @php
-                                        $daysRemaining = $activeSubscription->ends_at->diffInDays(now());
-                                    @endphp
+                                <div class="col-sm-6">
+                                    <strong><i class="fas fa-dollar-sign mr-1"></i> Total a Pagar</strong>
                                     <p class="text-muted">
-                                        <span class="badge badge-{{ $daysRemaining > 30 ? 'success' : ($daysRemaining > 7 ? 'warning' : 'danger') }}">
-                                            {{ $daysRemaining }} días
+                                        <span class="badge badge-danger">
+                                            ${{ number_format($totalDebt, 2) }}
                                         </span>
                                     </p>
                                 </div>
                             </div>
-                            <hr>
-                            <div class="row">
-                                <div class="col-12">
-                                    <a href="{{ route('subscriptions.my') }}" class="btn btn-primary">
-                                        <i class="fas fa-eye"></i> Ver Mis Suscripciones
-                                    </a>
-                                    <a href="{{ route('subscriptions.plans') }}" class="btn btn-outline-primary">
-                                        <i class="fas fa-star"></i> Ver Otros Planes
-                                    </a>
-                                </div>
-                            </div>
-                        @else
-                            <div class="alert alert-warning">
-                                <h5><i class="fas fa-exclamation-triangle"></i> Sin Suscripción Activa</h5>
-                                <p>Para acceder a todas las funcionalidades del sistema, necesitas una suscripción activa.</p>
-                                <a href="{{ route('subscriptions.plans') }}" class="btn btn-primary">
-                                    <i class="fas fa-star"></i> Ver Planes Disponibles
+                        @endif
+                        
+                        <hr>
+                        <div class="row">
+                            <div class="col-12">
+                                <a href="{{ route('user-debts.my-debts') }}" class="btn btn-primary">
+                                    <i class="fas fa-eye"></i> Ver Mis Deudas
                                 </a>
                             </div>
-                        @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
                     </div>
                 </div>
             </div>

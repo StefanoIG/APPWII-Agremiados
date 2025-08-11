@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\MonthlyCut;
+use App\Models\UserDebt;
 use App\Notifications\UserApproved;
 use App\Notifications\UserRejected;
 use Illuminate\Http\Request;
@@ -13,7 +15,16 @@ class SecretariaController extends Controller
     public function index()
     {
         $pendingUsersCount = User::where('is_active', false)->count();
-        return view('secretaria.dashboard', compact('pendingUsersCount'));
+        $activeMonthlycut = MonthlyCut::where('status', 'active')->first();
+        $pendingDebtsCount = UserDebt::where('status', 'pending')->count();
+        $overdueDebtsCount = UserDebt::where('status', 'overdue')->count();
+        
+        return view('secretaria.dashboard', compact(
+            'pendingUsersCount', 
+            'activeMonthlycut', 
+            'pendingDebtsCount', 
+            'overdueDebtsCount'
+        ));
     }
     
     /**

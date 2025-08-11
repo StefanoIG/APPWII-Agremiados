@@ -39,24 +39,24 @@
                             <!-- Lado Izquierdo -->
                             <div class="bracket-side left-bracket">
                                 @for($round = 1; $round <= $maxRounds; $round++)
-                                    @if(isset($leftBrackets[$round]) && $leftBrackets[$round]->count() > 0)
-                                        <div class="bracket-column" data-round="{{ $round }}">
-                                            <div class="round-header">
-                                                @if($round == 1)
-                                                    Primera Ronda
-                                                @elseif($round == 2)
-                                                    Octavos
-                                                @elseif($round == 3)
-                                                    Cuartos
-                                                @elseif($round == 4)
-                                                    Semifinal
-                                                @else
-                                                    Ronda {{ $round }}
-                                                @endif
-                                            </div>
-                                            <div class="round-matches" data-matches="{{ $leftBrackets[$round]->count() }}">
-                                                @foreach($leftBrackets[$round] as $index => $match)
-                                                    <div class="match-container" style="margin-bottom: {{ $round > 1 ? (20 * pow(2, $round-1)) : 10 }}px;">
+                                    <div class="bracket-column">
+                                        <div class="round-header">
+                                            @if($round == 1)
+                                                Primera Ronda
+                                            @elseif($round == 2)
+                                                Octavos
+                                            @elseif($round == 3)
+                                                Cuartos
+                                            @elseif($round == 4)
+                                                Semifinal
+                                            @else
+                                                Ronda {{ $round }}
+                                            @endif
+                                        </div>
+                                        <div class="round-matches">
+                                            @if(isset($leftBrackets[$round]))
+                                                @foreach($leftBrackets[$round] as $match)
+                                                    <div class="match-container">
                                                         <div class="match {{ $match->status }}">
                                                             <div class="team {{ $match->winner_id == $match->team1_id ? 'winner' : '' }}">
                                                                 @if($match->team1)
@@ -93,33 +93,14 @@
                                                                 @endif
                                                             </div>
                                                         </div>
-                                                        
-                                                        {{-- Botón para registrar resultado --}}
-                                                        @if($match->team1 && $match->team2 && !$match->winner_id)
-                                                            <div class="match-actions">
-                                                                <a href="{{ route('competitions.match.result', [$competition, $match]) }}" 
-                                                                   class="btn btn-success btn-xs">
-                                                                    <i class="fas fa-plus"></i> Registrar Resultado
-                                                                </a>
-                                                            </div>
-                                                        @elseif($match->winner_id && $match->evidence_file)
-                                                            <div class="match-actions">
-                                                                <a href="{{ asset('storage/' . $match->evidence_file) }}" 
-                                                                   target="_blank" 
-                                                                   class="btn btn-info btn-xs">
-                                                                    <i class="fas fa-eye"></i> Ver Evidencia
-                                                                </a>
-                                                            </div>
-                                                        @endif
-                                                        
                                                         @if($round < $maxRounds)
                                                             <div class="connector-line"></div>
                                                         @endif
                                                     </div>
                                                 @endforeach
-                                            </div>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
                                 @endfor
                             </div>
 
@@ -166,24 +147,6 @@
                                             @endif
                                         </div>
                                     </div>
-                                    
-                                    {{-- Botón para registrar resultado del match final --}}
-                                    @if($finalMatch->team1 && $finalMatch->team2 && !$finalMatch->winner_id)
-                                        <div class="final-match-actions">
-                                            <a href="{{ route('competitions.match.result', [$competition, $finalMatch]) }}" 
-                                               class="btn btn-success btn-sm">
-                                                <i class="fas fa-plus"></i> Registrar Resultado Final
-                                            </a>
-                                        </div>
-                                    @elseif($finalMatch->winner_id && $finalMatch->evidence_file)
-                                        <div class="final-match-actions">
-                                            <a href="{{ asset('storage/' . $finalMatch->evidence_file) }}" 
-                                               target="_blank" 
-                                               class="btn btn-info btn-sm">
-                                                <i class="fas fa-eye"></i> Ver Evidencia
-                                            </a>
-                                        </div>
-                                    @endif
                                 @else
                                     <div class="final-match pending">
                                         <div class="team">
@@ -202,27 +165,27 @@
 
                             <!-- Lado Derecho -->
                             <div class="bracket-side right-bracket">
-                                @for($round = $maxRounds; $round >= 1; $round--)
-                                    @if(isset($rightBrackets[$round]) && $rightBrackets[$round]->count() > 0)
-                                        <div class="bracket-column" data-round="{{ $round }}">
-                                            <div class="round-header">
-                                                @if($round == 1)
-                                                    Primera Ronda
-                                                @elseif($round == 2)
-                                                    Octavos
-                                                @elseif($round == 3)
-                                                    Cuartos
-                                                @elseif($round == 4)
-                                                    Semifinal
-                                                @else
-                                                    Ronda {{ $round }}
-                                                @endif
-                                            </div>
-                                            <div class="round-matches" data-matches="{{ $rightBrackets[$round]->count() }}">
-                                                @foreach($rightBrackets[$round] as $index => $match)
-                                                    <div class="match-container" style="margin-bottom: {{ $round > 1 ? (20 * pow(2, $round-1)) : 10 }}px;">
-                                                        @if($round > 1)
-                                                            <div class="connector-line-right"></div>
+                                @for($round = 1; $round <= $maxRounds; $round++)
+                                    <div class="bracket-column">
+                                        <div class="round-header">
+                                            @if($round == 1)
+                                                Primera Ronda
+                                            @elseif($round == 2)
+                                                Octavos
+                                            @elseif($round == 3)
+                                                Cuartos
+                                            @elseif($round == 4)
+                                                Semifinal
+                                            @else
+                                                Ronda {{ $round }}
+                                            @endif
+                                        </div>
+                                        <div class="round-matches">
+                                            @if(isset($rightBrackets[$round]))
+                                                @foreach($rightBrackets[$round] as $match)
+                                                    <div class="match-container">
+                                                        @if($round < $maxRounds)
+                                                            <div class="connector-line"></div>
                                                         @endif
                                                         <div class="match {{ $match->status }}">
                                                             <div class="team {{ $match->winner_id == $match->team1_id ? 'winner' : '' }}">
@@ -260,29 +223,11 @@
                                                                 @endif
                                                             </div>
                                                         </div>
-                                                        
-                                                        {{-- Botón para registrar resultado --}}
-                                                        @if($match->team1 && $match->team2 && !$match->winner_id)
-                                                            <div class="match-actions">
-                                                                <a href="{{ route('competitions.match.result', [$competition, $match]) }}" 
-                                                                   class="btn btn-success btn-xs">
-                                                                    <i class="fas fa-plus"></i> Registrar Resultado
-                                                                </a>
-                                                            </div>
-                                                        @elseif($match->winner_id && $match->evidence_file)
-                                                            <div class="match-actions">
-                                                                <a href="{{ asset('storage/' . $match->evidence_file) }}" 
-                                                                   target="_blank" 
-                                                                   class="btn btn-info btn-xs">
-                                                                    <i class="fas fa-eye"></i> Ver Evidencia
-                                                                </a>
-                                                            </div>
-                                                        @endif
                                                     </div>
                                                 @endforeach
-                                            </div>
+                                            @endif
                                         </div>
-                                    @endif
+                                    </div>
                                 @endfor
                             </div>
                         </div>
@@ -327,7 +272,7 @@
     .right-bracket {
         justify-content: flex-start;
         margin-left: 20px;
-        /* El lado derecho NO debe tener flex-direction: row-reverse para que las rondas aparezcan en orden correcto */
+        flex-direction: row-reverse;
     }
 
     .bracket-column {
@@ -355,25 +300,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
-        gap: 10px;
-        min-height: 400px;
-    }
-
-    /* Espaciado inteligente basado en la ronda */
-    .bracket-column[data-round="1"] .round-matches {
-        gap: 15px;
-    }
-
-    .bracket-column[data-round="2"] .round-matches {
-        gap: 40px;
-    }
-
-    .bracket-column[data-round="3"] .round-matches {
-        gap: 80px;
-    }
-
-    .bracket-column[data-round="4"] .round-matches {
-        gap: 160px;
+        gap: 30px;
     }
 
     .match-container {
@@ -458,143 +385,36 @@
     }
 
     .connector-line {
-        width: 40px;
+        width: 30px;
         height: 2px;
         background: #ffd700;
         position: relative;
-        z-index: 1;
-    }
-
-    .connector-line-right {
-        width: 40px;
-        height: 2px;
-        background: #ffd700;
-        position: relative;
-        z-index: 1;
     }
 
     .left-bracket .connector-line {
         margin-left: 10px;
     }
 
-    .right-bracket .connector-line-right {
+    .right-bracket .connector-line {
         margin-right: 10px;
     }
 
-    /* Conectores verticales dinámicos */
-    .bracket-column[data-round="1"] .connector-line::before,
-    .bracket-column[data-round="1"] .connector-line::after {
+    .connector-line::before,
+    .connector-line::after {
         content: '';
         position: absolute;
         width: 2px;
+        height: 40px;
         background: #ffd700;
         right: 0;
     }
 
-    .bracket-column[data-round="1"] .connector-line::before {
-        height: 30px;
-        top: -30px;
+    .connector-line::before {
+        top: -40px;
     }
 
-    .bracket-column[data-round="1"] .connector-line::after {
-        height: 30px;
-        bottom: -30px;
-    }
-
-    .bracket-column[data-round="2"] .connector-line::before,
-    .bracket-column[data-round="2"] .connector-line::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: #ffd700;
-        right: 0;
-    }
-
-    .bracket-column[data-round="2"] .connector-line::before {
-        height: 60px;
-        top: -60px;
-    }
-
-    .bracket-column[data-round="2"] .connector-line::after {
-        height: 60px;
-        bottom: -60px;
-    }
-
-    .bracket-column[data-round="3"] .connector-line::before,
-    .bracket-column[data-round="3"] .connector-line::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: #ffd700;
-        right: 0;
-    }
-
-    .bracket-column[data-round="3"] .connector-line::before {
-        height: 120px;
-        top: -120px;
-    }
-
-    .bracket-column[data-round="3"] .connector-line::after {
-        height: 120px;
-        bottom: -120px;
-    }
-
-    /* Conectores para el lado derecho */
-    .right-bracket .bracket-column[data-round="1"] .connector-line-right::before,
-    .right-bracket .bracket-column[data-round="1"] .connector-line-right::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: #ffd700;
-        left: 0;
-    }
-
-    .right-bracket .bracket-column[data-round="1"] .connector-line-right::before {
-        height: 30px;
-        top: -30px;
-    }
-
-    .right-bracket .bracket-column[data-round="1"] .connector-line-right::after {
-        height: 30px;
-        bottom: -30px;
-    }
-
-    .right-bracket .bracket-column[data-round="2"] .connector-line-right::before,
-    .right-bracket .bracket-column[data-round="2"] .connector-line-right::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: #ffd700;
-        left: 0;
-    }
-
-    .right-bracket .bracket-column[data-round="2"] .connector-line-right::before {
-        height: 60px;
-        top: -60px;
-    }
-
-    .right-bracket .bracket-column[data-round="2"] .connector-line-right::after {
-        height: 60px;
-        bottom: -60px;
-    }
-
-    .right-bracket .bracket-column[data-round="3"] .connector-line-right::before,
-    .right-bracket .bracket-column[data-round="3"] .connector-line-right::after {
-        content: '';
-        position: absolute;
-        width: 2px;
-        background: #ffd700;
-        left: 0;
-    }
-
-    .right-bracket .bracket-column[data-round="3"] .connector-line-right::before {
-        height: 120px;
-        top: -120px;
-    }
-
-    .right-bracket .bracket-column[data-round="3"] .connector-line-right::after {
-        height: 120px;
-        bottom: -120px;
+    .connector-line::after {
+        bottom: -40px;
     }
 
     .final-section {
@@ -706,39 +526,6 @@
             min-width: auto;
             max-width: none;
         }
-    }
-    
-    /* Estilos para botones de acción de match */
-    .match-actions {
-        margin-top: 8px;
-        text-align: center;
-    }
-    
-    .final-match-actions {
-        margin-top: 12px;
-        text-align: center;
-    }
-    
-    .match-actions .btn,
-    .final-match-actions .btn {
-        border-radius: 6px;
-        font-size: 0.75rem;
-        padding: 4px 8px;
-        transition: all 0.3s ease;
-        text-decoration: none;
-        display: inline-block;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .match-actions .btn:hover,
-    .final-match-actions .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    .btn-xs {
-        font-size: 0.7rem;
-        padding: 3px 6px;
     }
 </style>
 @stop

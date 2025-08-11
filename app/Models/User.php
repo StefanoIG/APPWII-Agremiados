@@ -105,11 +105,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Relación con las suscripciones del usuario
+     * Relación con las deudas del usuario
      */
-    public function subscriptions()
+    public function debts()
     {
-        return $this->hasMany(UserSubscription::class);
+        return $this->hasMany(UserDebt::class);
     }
 
     /**
@@ -121,19 +121,12 @@ class User extends Authenticatable
     }
 
     /**
-     * Obtener la suscripción activa del usuario
+     * Verificar si el usuario tiene deudas pendientes
      */
-    public function activeSubscription()
+    public function hasPendingDebts()
     {
-        return $this->subscriptions()->active()->first();
-    }
-
-    /**
-     * Verificar si el usuario tiene una suscripción activa
-     */
-    public function hasActiveSubscription()
-    {
-        return $this->activeSubscription() !== null;
+        return $this->debts()->pending()->exists() || 
+               $this->debts()->overdue()->exists();
     }
 
     /**
@@ -141,7 +134,31 @@ class User extends Authenticatable
      */
     public function canParticipateInCompetitions()
     {
-        return $this->hasActiveSubscription() && $this->is_active;
+        return !$this->hasPendingDebts() && $this->is_active;
+    }
+
+    /**
+     * Obtener deudas pendientes del usuario
+     */
+    public function getPendingDebts()
+    {
+        return $this->debts()->with('monthlyCut')->pending()->get();
+    }
+
+    /**
+     * Obtener deudas vencidas del usuario
+     */
+    public function getOverdueDebts()
+    {
+        return $this->debts()->with('monthlyCut')->overdue()->get();
+    }
+
+    /**
+     * Calcular total de deudas pendientes
+     */
+    public function getTotalPendingDebt()
+    {
+        return $this->debts()->where('status', '!=', 'paid')->sum('amount');
     }
 
     /**

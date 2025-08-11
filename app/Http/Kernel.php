@@ -3,9 +3,6 @@
 namespace App\Http;
 
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Middleware\RoleMiddleware;
-use Spatie\Permission\Middleware\PermissionMiddleware;
 
 class Kernel extends HttpKernel
 {
@@ -55,10 +52,11 @@ class Kernel extends HttpKernel
         'signed' => \Illuminate\Routing\Middleware\ValidateSignature::class,
         'throttle' => \Illuminate\Routing\Middleware\ThrottleRequests::class,
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
-        'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+        'role' => \App\Http\Middleware\CheckRoleCustom::class,
         'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
         'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         'active' => \App\Http\Middleware\CheckUserActive::class,
         'subscription' => \App\Http\Middleware\CheckSubscription::class,
+        'check.debts' => \App\Http\Middleware\CheckUserDebts::class,
     ];
 }

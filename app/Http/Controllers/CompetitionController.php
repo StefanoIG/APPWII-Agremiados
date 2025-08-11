@@ -781,4 +781,123 @@ class CompetitionController extends Controller
     {
         return pow(2, ceil(log($number, 2)));
     }
+
+    /**
+     * Mostrar formulario para registrar resultado de un partido
+     */
+    public function showMatchResult(Competition $competition, CompetitionBracket $bracket)
+    {
+        // Verificar permisos
+        if (!Auth::user()->hasAnyRole('admin', 'secretaria')) {
+            abort(403, 'No tienes permisos para registrar resultados.');
+        }
+
+        $bracket->load(['team1', 'team2', 'registeredBy']);
+        
+        return view('competitions.match-result', compact('competition', 'bracket'));
+    }
+
+    /**
+     * Registrar el resultado de un partido
+     */
+    public function storeMatchResult(Request $request, Competition $competition, CompetitionBracket $bracket)
+    {
+        // Verificar permisos
+        if (!Auth::user()->hasAnyRole('admin', 'secretaria')) {
+            abort(403, 'No tienes permisos para registrar resultados.');
+        }
+
+        $request->validate([
+            'team1_score' => 'required|integer|min:0',
+            'team2_score' => 'required|integer|min:0',
+            'notes' => 'nullable|string|max:500',
+            'evidence' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048'
+        ]);
+
+        // Validar que los puntajes no sean iguales
+        if ($request->team1_score == $request->team2_score) {
+            return back()->withErrors(['error' => 'No puede haber empates. Debe haber un ganador.']);
+        }
+
+        // Determinar el ganador
+        $winnerId = $request->team1_score > $request->team2_score ? 
+                   $bracket->team1_id : $bracket->team2_id;
+
+        // Subir evidencia si se proporciona
+        $evidenceFile = null;
+        $evidenceType = null;
+        
+        if ($request->hasFile('evidence')) {
+            $file = $request->file('evidence');
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $evidenceFile = $file->storeAs('competition_evidence', $fileName, 'public');
+            $evidenceType = $file->getClientOriginalExtension();
+        }
+
+        // Actualizar el bracket con el resultado
+        $bracket->update([
+            'team1_score' => $request->team1_score,
+            'team2_score' => $request->team2_score,
+            'winner_id' => $winnerId,
+            'notes' => $request->notes,
+            'evidence_file' => $evidenceFile,
+            'evidence_type' => $evidenceType,
+            'status' => 'completed',
+            'result_registered_by' => Auth::id(),
+            'result_registered_at' => now()
+        ]);
+
+        // Avanzar al ganador en el siguiente round si existe
+        $this->advanceWinnerToNextRound($competition, $bracket, $winnerId);
+
+        return redirect()
+            ->route('competitions.brackets', $competition)
+            ->with('success', 'Resultado registrado exitosamente.');
+    }
+
+    /**
+     * Avanzar ganador al siguiente round
+     */
+    private function advanceWinnerToNextRound(Competition $competition, CompetitionBracket $bracket, $winnerId)
+    {
+        $nextRound = $bracket->round + 1;
+        
+        // Calcular la posición en el siguiente round
+        $nextPosition = ceil($bracket->position / 2);
+        
+        // Buscar el bracket del siguiente round
+        $nextBracket = CompetitionBracket::where('competition_id', $competition->id)
+            ->where('round', $nextRound)
+            ->where('position', $nextPosition)
+            ->first();
+
+        if ($nextBracket) {
+            // Determinar si el ganador va como team1 o team2
+            if ($bracket->position % 2 == 1) {
+                // Posición impar -> va como team1
+                $nextBracket->update(['team1_id' => $winnerId]);
+            } else {
+                // Posición par -> va como team2
+                $nextBracket->update(['team2_id' => $winnerId]);
+            }
+        }
+    }
+
+    /**
+     * Descargar evidencia de un partido
+     */
+    public function downloadEvidence(Competition $competition, CompetitionBracket $bracket)
+    {
+        if (!$bracket->evidence_file) {
+            abort(404, 'No hay evidencia disponible para este partido.');
+        }
+
+        $path = storage_path('app/public/' . $bracket->evidence_file);
+        
+        if (!file_exists($path)) {
+            abort(404, 'Archivo de evidencia no encontrado.');
+        }
+
+        return response()->download($path);
+    }
 }

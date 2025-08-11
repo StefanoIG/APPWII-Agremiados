@@ -6,6 +6,19 @@
     <p class="login-box-msg">Complete todos los campos para crear su cuenta</p>
 
     <form action="{{ route('register') }}" method="post" enctype="multipart/form-data">
+        {{-- Mostrar valor de alícuota --}}
+        <div class="row mb-3">
+            <div class="col-12">
+                <div class="alert alert-secondary">
+                    <i class="fas fa-coins text-warning"></i>
+                    <strong>Valor de la alícuota gremial:</strong>
+                    <span class="text-primary font-weight-bold">
+                        ${{ number_format(config('gremio.alicuota'), 0, ',', '.') }}
+                    </span>
+                    <small class="text-muted">(Este valor es parametrizable por el gremio y puede cambiar)</small>
+                </div>
+            </div>
+        </div>
         @csrf
 
         <div class="row">

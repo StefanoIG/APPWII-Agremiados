@@ -335,16 +335,10 @@ return [
             'can' => 'admin',
         ],
         [
-            'text' => 'Planes de Suscripción',
-            'route' => 'admin.planes',
-            'icon' => 'fas fa-credit-card',
-            'can' => 'admin',
-        ],
-        [
-            'text' => 'Reportes Suscripciones',
-            'route' => 'admin.suscripciones',
-            'icon' => 'fas fa-chart-line',
-            'can' => 'admin',
+            'text' => 'Cortes Mensuales',
+            'route' => 'monthly-cuts.index',
+            'icon' => 'fas fa-calendar-alt',
+            'can' => ['admin', 'secretaria'],
         ],
         [
             'text' => 'Ver Pagos',
@@ -369,6 +363,12 @@ return [
             'route' => 'secretaria.usuarios-pendientes',
             'icon' => 'fas fa-user-clock',
             'can' => 'secretaria',
+        ],
+        [
+            'text' => 'Gestión de Deudas',
+            'route' => 'user-debts.index',
+            'icon' => 'fas fa-file-invoice-dollar',
+            'can' => ['admin', 'secretaria'],
         ],
         [
             'text' => 'Pagos Pendientes',
@@ -453,20 +453,14 @@ return [
             'icon' => 'fas fa-newspaper',
             'can' => ['admin', 'secretaria'],
         ],
-        
         // Sección personal
         [
-            'header' => 'SUSCRIPCIONES',
+            'header' => 'MIS PAGOS',
         ],
         [
-            'text' => 'Planes Disponibles',
-            'route' => 'subscriptions.plans',
-            'icon' => 'fas fa-star',
-        ],
-        [
-            'text' => 'Mis Suscripciones',
-            'route' => 'subscriptions.my',
-            'icon' => 'fas fa-receipt',
+            'text' => 'Mis Deudas',
+            'route' => 'user-debts.my-debts',
+            'icon' => 'fas fa-money-bill-wave',
         ],
         
         // Sección de competencias

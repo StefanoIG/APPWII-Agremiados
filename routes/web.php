@@ -15,7 +15,8 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\SecretariaController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\CompetitionController;
-use Spatie\Permission\Middlewares\RoleMiddleware;
+use App\Http\Controllers\MonthlyCutController;
+use App\Http\Controllers\UserDebtController;
 use Illuminate\Support\Facades\Auth;
 
 // Página principal
@@ -32,7 +33,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])
     ->middleware(['auth', \App\Http\Middleware\CheckUserActive::class]);
 
 // Panel para ADMIN
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::get('/admin', [AdminController::class, 'index'])->name('admin.dashboard');
     
     // Gestión de planes de suscripción para admin
@@ -51,14 +52,25 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:ad
 });
 
 // Panel para SECRETARIA
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:secretaria'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::get('/secretaria', [SecretariaController::class, 'index'])->name('secretaria.dashboard');
     Route::get('/secretaria/usuarios-pendientes', [SecretariaController::class, 'usuariosPendientes'])->name('secretaria.usuarios-pendientes');
     Route::get('/secretaria/usuario/{id}', [SecretariaController::class, 'mostrarUsuario'])->name('secretaria.mostrar-usuario');
     Route::post('/secretaria/usuario/{id}/aprobar', [SecretariaController::class, 'aprobarUsuario'])->name('secretaria.aprobar-usuario');
     Route::post('/secretaria/usuario/{id}/rechazar', [SecretariaController::class, 'rechazarUsuario'])->name('secretaria.rechazar-usuario');
     
-    // Gestión de pagos para secretaria
+    // Gestión de cortes mensuales
+    Route::resource('monthly-cuts', MonthlyCutController::class)->except(['destroy']);
+    Route::patch('/monthly-cuts/{monthlyCut}/close', [MonthlyCutController::class, 'close'])->name('monthly-cuts.close');
+    
+    // Gestión de deudas y pagos
+    Route::get('/debts/manage-payments', [UserDebtController::class, 'managePayments'])->name('debts.manage-payments');
+    Route::post('/debts/{debt}/approve', [UserDebtController::class, 'approvePayment'])->name('debts.approve');
+    Route::post('/debts/{debt}/reject', [UserDebtController::class, 'rejectPayment'])->name('debts.reject');
+    Route::get('/debts/summary', [UserDebtController::class, 'debtsSummary'])->name('debts.summary');
+    Route::post('/debts/mark-overdue', [UserDebtController::class, 'markOverdueDebts'])->name('debts.mark-overdue');
+    
+    // Gestión de pagos para secretaria (legacy - mantener por compatibilidad)
     Route::get('/secretaria/pagos-pendientes', [PaymentController::class, 'pending'])->name('secretaria.pagos-pendientes');
     Route::get('/secretaria/pago/{receipt}', [PaymentController::class, 'show'])->name('secretaria.mostrar-pago');
     Route::post('/secretaria/pago/{receipt}/aprobar', [PaymentController::class, 'approve'])->name('secretaria.aprobar-pago');
@@ -70,8 +82,8 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'role:se
     Route::patch('/secretaria/planes/{plan}/toggle', [SubscriptionController::class, 'togglePlan'])->name('secretaria.plans.toggle');
 });
 
-// Rutas de pagos para admin y secretaria
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin|secretaria'])->group(function () {
+// Rutas compartidas (Admin y Secretaria)
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::get('/pagos/pendientes', [PaymentController::class, 'pending'])->name('payments.pending');
     Route::get('/pago/{receipt}', [PaymentController::class, 'show'])->name('payments.show');
     Route::post('/pago/{receipt}/aprobar', [PaymentController::class, 'approve'])->name('payments.approve');
@@ -87,12 +99,12 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
 });
 
 // Rutas de roles (Spatie compatible, sin bindings automáticos)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
     Route::resource('roles', RolController::class); // No cambiar parámetros, usar modelo Spatie
 });
 
 // Usuarios y gestión de usuarios (admin y secretaria)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin|secretaria'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin|secretaria*/'])->group(function () {
     Route::resource('users', UserController::class);
     // Puedes agregar aquí rutas adicionales para usuarios pendientes si las necesitas.
 });
@@ -102,6 +114,11 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
     Route::get('/profile', function () {
         return view('profile.show');
     })->name('profile.show');
+    
+    // Gestión de deudas para usuarios
+    Route::get('/my-debts', [UserDebtController::class, 'myDebts'])->name('debts.my-debts');
+    Route::get('/debts/{debt}/pay', [UserDebtController::class, 'payDebt'])->name('debts.pay');
+    Route::post('/debts/{debt}/process-payment', [UserDebtController::class, 'processPayment'])->name('debts.process-payment');
     
     // Rutas para que los usuarios vean sus propios archivos
     Route::get('/mi-archivo/titulo', function () {
@@ -161,10 +178,38 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
     // Rutas para brackets
     Route::get('/competencias/{competition}/brackets', [App\Http\Controllers\CompetitionController::class, 'showBrackets'])->name('competitions.brackets');
     Route::post('/competencias/{competition}/generar-brackets', [App\Http\Controllers\CompetitionController::class, 'generateBrackets'])->name('competitions.brackets.generate');
+    
+    // Rutas para gestión de resultados (solo admin/secretaria)
+    Route::get('/competencias/{competition}/brackets/{bracket}/resultado', [App\Http\Controllers\CompetitionController::class, 'showMatchResult'])->name('competitions.match.result');
+    Route::post('/competencias/{competition}/brackets/{bracket}/resultado', [App\Http\Controllers\CompetitionController::class, 'storeMatchResult'])->name('competitions.match.store');
+    Route::get('/competencias/{competition}/brackets/{bracket}/evidencia', [App\Http\Controllers\CompetitionController::class, 'downloadEvidence'])->name('competitions.match.evidence');
+});
+
+// Rutas de usuarios comunes (solo usuarios autenticados)
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
+    // Ver mis deudas
+    Route::get('/mis-deudas', [UserDebtController::class, 'myDebts'])->name('user-debts.my-debts');
+    Route::post('/mis-deudas/{debt}/pagar', [UserDebtController::class, 'pay'])->name('user-debts.pay');
+});
+
+// Rutas de gestión de deudas (solo admin y secretaria)
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
+    // Cortes mensuales
+    Route::get('/cortes-mensuales', [MonthlyCutController::class, 'index'])->name('monthly-cuts.index');
+    Route::get('/cortes-mensuales/crear', [MonthlyCutController::class, 'create'])->name('monthly-cuts.create');
+    Route::post('/cortes-mensuales', [MonthlyCutController::class, 'store'])->name('monthly-cuts.store');
+    Route::get('/cortes-mensuales/{cut}', [MonthlyCutController::class, 'show'])->name('monthly-cuts.show');
+    Route::post('/cortes-mensuales/{cut}/cerrar', [MonthlyCutController::class, 'close'])->name('monthly-cuts.close');
+    
+    // Gestión de deudas
+    Route::get('/deudas', [UserDebtController::class, 'index'])->name('user-debts.index');
+    Route::get('/deudas/{debt}', [UserDebtController::class, 'show'])->name('user-debts.show');
+    Route::post('/deudas/{debt}/aprobar', [UserDebtController::class, 'approve'])->name('user-debts.approve');
+    Route::post('/deudas/{debt}/rechazar', [UserDebtController::class, 'reject'])->name('user-debts.reject');
 });
 
 // Rutas protegidas para archivos (solo para secretaria y admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:secretaria|admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:secretaria|admin*/'])->group(function () {
     Route::get('/archivo/titulo/{filename}', function ($filename) {
         $path = storage_path('app/public/titulos/' . $filename);
         
@@ -187,17 +232,17 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\
 });
 
 // Rutas para Categorías (solo admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
     Route::resource('categorias', CategoriaController::class);
 });
 
 // Rutas para Disciplinas (solo admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
     Route::resource('disciplinas', DisciplinaController::class);
 });
 
 // Rutas para gestión de pagos de Admin
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, 'Spatie\Permission\Middleware\RoleMiddleware:admin'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
     Route::get('/admin/pagos', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('admin.payments.index');
     Route::get('/admin/pagos/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('admin.payments.show');
 });
