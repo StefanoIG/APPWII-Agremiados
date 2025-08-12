@@ -1,17 +1,17 @@
 @extends('adminlte::page')
 
-@section('title', 'Competencias')
+@section('title', 'Competencias y Cursos')
 
 @section('content_header')
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Competencias</h1>
+                <h1 class="m-0">Competencias y Cursos</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Inicio</a></li>
-                    <li class="breadcrumb-item active">Competencias</li>
+                    <li class="breadcrumb-item active">Competencias y Cursos</li>
                 </ol>
             </div>
         </div>
@@ -62,27 +62,32 @@
                             <div class="card h-100 {{ $competition->status === 'open' ? 'border-success' : '' }}">
                                 <div class="card-header">
                                     <h5 class="card-title mb-0">{{ $competition->name }}</h5>
-                                    <span class="badge badge-{{ 
-                                        $competition->status === 'open' ? 'success' : 
-                                        ($competition->status === 'draft' ? 'warning' :
-                                        ($competition->status === 'rejected' ? 'danger' :
-                                        ($competition->status === 'closed' ? 'secondary' : 
-                                        ($competition->status === 'in_progress' ? 'info' : 'secondary')))) 
-                                    }}">
-                                        @if($competition->status === 'draft')
-                                            Borrador
-                                        @elseif($competition->status === 'open')
-                                            Abierta
-                                        @elseif($competition->status === 'rejected')
-                                            Rechazada
-                                        @elseif($competition->status === 'closed')
-                                            Cerrada
-                                        @elseif($competition->status === 'in_progress')
-                                            En Progreso
-                                        @else
-                                            {{ ucfirst($competition->status) }}
-                                        @endif
-                                    </span>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge badge-{{ $competition->type === 'course' ? 'info' : 'primary' }}">
+                                            {{ $competition->type === 'course' ? 'Curso' : 'Competencia' }}
+                                        </span>
+                                        <span class="badge badge-{{ 
+                                            $competition->status === 'open' ? 'success' : 
+                                            ($competition->status === 'draft' ? 'warning' :
+                                            ($competition->status === 'rejected' ? 'danger' :
+                                            ($competition->status === 'closed' ? 'secondary' : 
+                                            ($competition->status === 'in_progress' ? 'info' : 'secondary')))) 
+                                        }}">
+                                            @if($competition->status === 'draft')
+                                                Borrador
+                                            @elseif($competition->status === 'open')
+                                                Abierta
+                                            @elseif($competition->status === 'rejected')
+                                                Rechazada
+                                            @elseif($competition->status === 'closed')
+                                                Cerrada
+                                            @elseif($competition->status === 'in_progress')
+                                                En Progreso
+                                            @else
+                                                {{ ucfirst($competition->status) }}
+                                            @endif
+                                        </span>
+                                    </div>
                                 </div>
                                 <div class="card-body">
                                     <p class="card-text">

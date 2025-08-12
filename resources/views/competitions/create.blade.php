@@ -1,17 +1,17 @@
 @extends('adminlte::page')
 
-@section('title', 'Crear Competencia')
+@section('title', 'Crear Competencia/Curso')
 
 @section('content_header')
     <div class="container-fluid">
         <div class="row mb-2">
             <div class="col-sm-6">
-                <h1 class="m-0">Crear Nueva Competencia</h1>
+                <h1 class="m-0">Crear Nueva Competencia o Curso</h1>
             </div>
             <div class="col-sm-6">
                 <ol class="breadcrumb float-sm-right">
                     <li class="breadcrumb-item"><a href="{{ route('home') }}">Inicio</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('competitions.index') }}">Competencias</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('competitions.index') }}">Competencias y Cursos</a></li>
                     <li class="breadcrumb-item active">Crear</li>
                 </ol>
             </div>
@@ -25,7 +25,7 @@
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title"><i class="fas fa-trophy"></i> Información de la Competencia</h3>
+                    <h3 class="card-title"><i class="fas fa-trophy"></i> Información de la Competencia/Curso</h3>
                 </div>
                 <form action="{{ route('competitions.store') }}" method="POST">
                     @csrf
@@ -41,12 +41,26 @@
                         @endif
 
                         <div class="row">
-                            <div class="col-md-12">
+                            <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name">Nombre de la Competencia *</label>
+                                    <label for="name">Nombre *</label>
                                     <input type="text" class="form-control @error('name') is-invalid @enderror" 
                                            id="name" name="name" value="{{ old('name') }}" required>
                                     @error('name')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="type">Tipo *</label>
+                                    <select class="form-control @error('type') is-invalid @enderror" 
+                                            id="type" name="type" required>
+                                        <option value="">Seleccionar tipo</option>
+                                        <option value="competition" {{ old('type') == 'competition' ? 'selected' : '' }}>Competencia</option>
+                                        <option value="course" {{ old('type') == 'course' ? 'selected' : '' }}>Curso</option>
+                                    </select>
+                                    @error('type')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>

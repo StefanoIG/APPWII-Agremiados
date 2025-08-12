@@ -12,6 +12,7 @@ class Competition extends Model
 
     protected $fillable = [
         'name',
+        'type',
         'description',
         'categoria_id',
         'disciplina_id',

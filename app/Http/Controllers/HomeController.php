@@ -47,7 +47,7 @@ class HomeController extends Controller
                 $days = now()->diffInDays($nextCompetition->start_date, false);
                 // Si tiene decimales (horas), redondear hacia arriba
                 $hours = now()->diffInHours($nextCompetition->start_date, false);
-                $data['nextCompetitionDays'] = $days > 0 ? $days : ($hours > 0 ? 1 : 0);
+                $data['nextCompetitionDays'] = $days > 0 ? ceil($days) : ($hours > 0 ? 1 : 0);
                 $data['nextCompetitionName'] = $nextCompetition->name;
             } else {
                 $data['nextCompetitionDays'] = null;

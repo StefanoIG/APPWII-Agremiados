@@ -214,7 +214,7 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(
 });
 
 // Rutas protegidas para archivos (solo para secretaria y admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:secretaria|admin*/'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::get('/archivo/titulo/{filename}', function ($filename) {
         $path = storage_path('app/public/titulos/' . $filename);
         
@@ -237,17 +237,17 @@ Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:
 });
 
 // Rutas para Categorías (solo admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::resource('categorias', CategoriaController::class);
 });
 
 // Rutas para Disciplinas (solo admin)
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::resource('disciplinas', DisciplinaController::class);
 });
 
 // Rutas para gestión de pagos de Admin
-Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class, '/*role:admin*/'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\CheckUserActive::class])->group(function () {
     Route::get('/admin/pagos', [App\Http\Controllers\Admin\PaymentController::class, 'index'])->name('admin.payments.index');
     Route::get('/admin/pagos/{payment}', [App\Http\Controllers\Admin\PaymentController::class, 'show'])->name('admin.payments.show');
 });

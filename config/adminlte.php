@@ -341,6 +341,12 @@ return [
             'can' => ['admin', 'secretaria'],
         ],
         [
+            'text' => 'Disciplinas',
+            'route' => 'disciplinas.index',
+            'icon' => 'fas fa-dumbbell',
+            'can' => 'admin',
+        ],
+        [
             'text' => 'Ver Pagos',
             'route' => 'admin.payments.index',
             'icon' => 'fas fa-money-bill',
@@ -463,17 +469,17 @@ return [
             'icon' => 'fas fa-money-bill-wave',
         ],
         
-        // Sección de competencias
+        // Sección de competencias y cursos
         [
-            'header' => 'COMPETENCIAS',
+            'header' => 'COMPETENCIAS Y CURSOS',
         ],
         [
-            'text' => 'Todas las Competencias',
+            'text' => 'Competencias y Cursos',
             'route' => 'competitions.index',
             'icon' => 'fas fa-trophy',
         ],
         [
-            'text' => 'Crear Competencia',
+            'text' => 'Crear Competencia/Curso',
             'route' => 'competitions.create',
             'icon' => 'fas fa-plus-circle',
             'can' => ['admin', 'secretaria'],

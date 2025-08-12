@@ -58,6 +58,7 @@ class CompetitionController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'type' => 'required|in:competition,course',
             'description' => 'nullable|string',
             'categoria_id' => 'required|exists:categorias,id',
             'disciplina_id' => 'required|exists:disciplinas,id',
@@ -80,6 +81,7 @@ class CompetitionController extends Controller
 
         $competition = Competition::create([
             'name' => $request->name,
+            'type' => $request->type,
             'description' => $request->description,
             'categoria_id' => $request->categoria_id,
             'disciplina_id' => $request->disciplina_id,
