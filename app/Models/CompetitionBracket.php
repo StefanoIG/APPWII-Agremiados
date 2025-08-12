@@ -21,11 +21,16 @@ class CompetitionBracket extends Model
         'match_date',
         'team1_score',
         'team2_score',
-        'notes'
+        'notes',
+        'evidence_file',
+        'evidence_type',
+        'result_registered_by',
+        'result_registered_at'
     ];
 
     protected $casts = [
-        'match_date' => 'datetime'
+        'match_date' => 'datetime',
+        'result_registered_at' => 'datetime'
     ];
 
     /**
@@ -58,6 +63,14 @@ class CompetitionBracket extends Model
     public function winner()
     {
         return $this->belongsTo(CompetitionTeam::class, 'winner_id');
+    }
+
+    /**
+     * Relación con el usuario que registró el resultado
+     */
+    public function registeredBy()
+    {
+        return $this->belongsTo(User::class, 'result_registered_by');
     }
 
     /**
