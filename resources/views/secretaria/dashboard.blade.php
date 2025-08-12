@@ -134,22 +134,36 @@
                 </div>
                 <div class="card-body">
                     <div class="row">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a href="{{ route('monthly-cuts.create') }}" class="btn btn-primary btn-block">
                                 <i class="fas fa-plus mr-2"></i>
                                 Crear Nuevo Corte
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a href="{{ route('user-debts.index') }}" class="btn btn-warning btn-block">
                                 <i class="fas fa-search mr-2"></i>
                                 Ver Todas las Deudas
                             </a>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <a href="{{ route('secretaria.usuarios-pendientes') }}" class="btn btn-info btn-block">
                                 <i class="fas fa-user-check mr-2"></i>
                                 Aprobar Usuarios
+                            </a>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <a href="{{ route('categorias.index') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-tags mr-2"></i>
+                                Gestionar Categorías
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{{ route('disciplinas.index') }}" class="btn btn-secondary btn-block">
+                                <i class="fas fa-dumbbell mr-2"></i>
+                                Gestionar Disciplinas
                             </a>
                         </div>
                     </div>

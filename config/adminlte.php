@@ -338,7 +338,7 @@ return [
             'text' => 'Cortes Mensuales',
             'route' => 'monthly-cuts.index',
             'icon' => 'fas fa-calendar-alt',
-            'can' => ['admin', 'secretaria'],
+            'can' => ['Admin', 'Secretaria'],
         ],
         [
             'text' => 'Disciplinas',
@@ -395,9 +395,22 @@ return [
             'can' => ['admin', 'secretaria'],
         ],
         
-        // Sección del sistema (futuras funcionalidades)
+        // Sección del sistema
         [
             'header' => 'SISTEMA',
+            'can' => ['admin', 'secretaria'],
+        ],
+        [
+            'text' => 'Categorías',
+            'route' => 'categorias.index',
+            'icon' => 'fas fa-tags',
+            'can' => ['admin', 'secretaria'],
+        ],
+        [
+            'text' => 'Disciplinas',
+            'route' => 'disciplinas.index',
+            'icon' => 'fas fa-dumbbell',
+            'can' => ['admin', 'secretaria'],
         ],
         [
             'text' => 'Dashboard Admin',
